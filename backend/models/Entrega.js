@@ -55,6 +55,16 @@ const entregaSchema = new mongoose.Schema({
         enum: ['Não Coletada', 'Em Rota', 'Entregue', 'Confirmada', 'Cancelada'],
         default: 'Não Coletada',
     },
+    valor_corrida:{ //VERIFICAR ISSO DEPOIS
+        type: Number,
+
+    },
+    data_coleta: {
+        type: Date,
+    },
+    data_entrega: {
+        type: Date,
+    },
     data_criacao: {
         type: Date,
         default: Date.now
