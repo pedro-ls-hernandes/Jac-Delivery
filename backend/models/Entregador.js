@@ -40,6 +40,10 @@ const entregadorSchema = new mongoose.Schema({
         enum: ['Ativo', 'Inativo'],
         default: 'Ativo'
     },
+    entregas: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Entrega'
+    }],
     user_login: {
         type: String,
         //required: true,

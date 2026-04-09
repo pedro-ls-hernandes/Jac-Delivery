@@ -23,7 +23,11 @@ const vendedorSchema = new mongoose.Schema({
     password: {
         type: String,
         //required: true
-    }
+    },
+    entregas: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Entrega'
+    }]
 });
 
 module.exports = mongoose.model('Vendedor', vendedorSchema);

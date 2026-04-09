@@ -55,9 +55,16 @@ const entregaSchema = new mongoose.Schema({
         enum: ['Não Coletada', 'Em Rota', 'Entregue', 'Confirmada', 'Cancelada'],
         default: 'Não Coletada',
     },
-    valor_corrida:{ //VERIFICAR ISSO DEPOIS
+    forma_pagamento: {
+        type: String,
+        required: true,
+        enum: ['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'Pix Bradesco', 'Pix QR Code', 'Crediário Loja'],
+    },
+    taxa_entrega: {
         type: Number,
-
+    },
+    valor_corrida:{
+        type: Number,
     },
     data_coleta: {
         type: Date,
