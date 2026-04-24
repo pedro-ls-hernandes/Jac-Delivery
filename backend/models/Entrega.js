@@ -1,29 +1,41 @@
 const mongoose = require('mongoose');
-require
+const { randomUUID } = require('crypto');
 
 const entregaSchema = new mongoose.Schema({
-    cliente: {
-        type: String,
-        required: true
-    },
     cadastro_loja: {
         type: String,
-        unique: true
+        unique: true,
+        default: () => randomUUID()
+    },
+    cliente_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Cliente',
+        required: true
+    },
+    cliente: {
+        type: String,
+        required: true,
+        trim: true
     },
     telefone: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     logradouro: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     numero: {
         type: String,
+        trim: true,
+        default: ''
     },
     bairro: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     cidade: {
         type: String,
@@ -39,20 +51,46 @@ const entregaSchema = new mongoose.Schema({
     entregador: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Entregador',
-        required: true
+        default: null
+    },
+    tipo_entregador: {
+        type: String,
+        required: true,
+        enum: ['Registrado', 'Terceirizado'],
+        default: 'Registrado'
+    },
+    entregador_terceirizado: {
+        nome: {
+            type: String,
+            trim: true,
+            default: ''
+        },
+        telefone: {
+            type: String,
+            trim: true,
+            default: ''
+        },
+        documento: {
+            type: String,
+            trim: true,
+            default: ''
+        }
     },
     observacoes:
     {
         type: String,
+        trim: true,
+        default: ''
     },
     valor: {
         type: Number,
-        required: true
+        required: true,
+        min: 0
     },
     status: {
         type: String,
         required: true,
-        enum: ['Não Coletada', 'Em Rota', 'Entregue', 'Confirmada', 'Cancelada'],
+        enum: ['Não Coletada', 'Coletada', 'Em Rota', 'Entregue', 'Confirmada', 'Cancelada'],
         default: 'Não Coletada',
     },
     forma_pagamento: {
@@ -62,9 +100,15 @@ const entregaSchema = new mongoose.Schema({
     },
     taxa_entrega: {
         type: Number,
+        default: 0
     },
     valor_corrida:{
         type: Number,
+        default: 0
+    },
+    ordem: {
+        type: Number,
+        default: 0
     },
     data_coleta: {
         type: Date,
@@ -72,10 +116,28 @@ const entregaSchema = new mongoose.Schema({
     data_entrega: {
         type: Date,
     },
+    data_confirmacao: {
+        type: Date,
+    },
+    cancelada_em: {
+        type: Date,
+    },
+    cancelada_por: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Admin',
+        default: null
+    },
+    coletada_por: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Entregador',
+        default: null
+    },
     data_criacao: {
         type: Date,
         default: Date.now
     }
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.model('Entrega', entregaSchema);

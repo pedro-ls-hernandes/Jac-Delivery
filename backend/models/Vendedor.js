@@ -3,11 +3,13 @@ const mongoose = require('mongoose');
 const vendedorSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     numero_venda: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     status: {
         type: String,
@@ -18,7 +20,9 @@ const vendedorSchema = new mongoose.Schema({
     user_login: {
         type: String,
         //required: true,
-        unique: true
+        unique: true,
+        sparse: true,
+        trim: true
     },
     password: {
         type: String,
@@ -28,6 +32,8 @@ const vendedorSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Entrega'
     }]
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.model('Vendedor', vendedorSchema);

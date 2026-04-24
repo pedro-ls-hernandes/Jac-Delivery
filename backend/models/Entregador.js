@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const entregadorSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     cpf: {
         type: String,
@@ -12,7 +13,8 @@ const entregadorSchema = new mongoose.Schema({
     },
     telefone: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     email: {
         type: String,
@@ -21,18 +23,23 @@ const entregadorSchema = new mongoose.Schema({
     },
     logradouro: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     numero: {
         type: String,
+        trim: true,
+        default: ''
     },
     bairro: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     cidade: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     status: {
         type: String,
@@ -47,12 +54,16 @@ const entregadorSchema = new mongoose.Schema({
     user_login: {
         type: String,
         //required: true,
-        unique: true
+        unique: true,
+        sparse: true,
+        trim: true
     },
     password: {
         type: String,
         //required: true
     }
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.model('Entregador', entregadorSchema);
