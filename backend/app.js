@@ -11,14 +11,32 @@ const metricasRoutes = require('./routes/metricasRoutes');
 
 const app = express();
 
-const corsOrigins = (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || '')
+const corsOrigins = (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || '*')
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
 
+function isOriginAllowed(origin) {
+    if (!origin || corsOrigins.length === 0 || corsOrigins.includes('*') || corsOrigins.includes(origin)) {
+        return true;
+    }
+
+    return corsOrigins.some((allowedOrigin) => {
+        if (!allowedOrigin.includes('*')) {
+            return false;
+        }
+
+        const pattern = new RegExp(`^${allowedOrigin
+            .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+            .replace(/\*/g, '.*')}$`);
+
+        return pattern.test(origin);
+    });
+}
+
 app.use(cors({
     origin(origin, callback) {
-        if (!origin || corsOrigins.length === 0 || corsOrigins.includes(origin)) {
+        if (isOriginAllowed(origin)) {
             return callback(null, true);
         }
 
