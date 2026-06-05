@@ -5,6 +5,7 @@ const Entregador = require('../models/Entregador');
 const { comparePassword } = require('../utils/hash');
 const { createError } = require('../utils/http');
 const { sanitizarAdmin } = require('./adminService');
+const adminService = require('./adminService');
 const { sanitizarVendedor } = require('./vendedorService');
 const { sanitizarEntregador } = require('./entregadorService');
 
@@ -17,8 +18,8 @@ function gerarToken(payload) {
 async function login({ role, identificador, login, username, email, password }) {
 	const usuario = identificador || login || username || email;
 
-	if (!role || !usuario || !password) {
-		throw createError(400, 'Perfil, identificador e senha são obrigatórios');
+	if (!usuario || !password) {
+		throw createError(400, 'Identificador e senha são obrigatórios');
 	}
 
 	let registro = null;
@@ -80,6 +81,11 @@ async function login({ role, identificador, login, username, email, password }) 
 	};
 }
 
+async function registrarAdmin(dados) {
+	return adminService.criarAdmin(dados);
+}
+
 module.exports = {
-	login
+	login,
+	registrarAdmin
 };

@@ -69,15 +69,9 @@ const entregaSchema = new mongoose.Schema({
             type: String,
             trim: true,
             default: ''
-        },
-        documento: {
-            type: String,
-            trim: true,
-            default: ''
         }
     },
-    observacoes:
-    {
+    observacoes: {
         type: String,
         trim: true,
         default: ''
@@ -91,18 +85,50 @@ const entregaSchema = new mongoose.Schema({
         type: String,
         required: true,
         enum: ['Não Coletada', 'Coletada', 'Em Rota', 'Entregue', 'Confirmada', 'Cancelada'],
-        default: 'Não Coletada',
+        default: 'Não Coletada'
     },
     forma_pagamento: {
         type: String,
         required: true,
-        enum: ['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'Pix Bradesco', 'Pix QR Code', 'Crediário Loja'],
+        enum: ['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'Pix Bradesco', 'Pix QR Code', 'Crediário Loja', 'Pagamento Combinado']
     },
+    valor_pago_dinheiro: {
+        type: Number,
+        default: 0,
+        min: 0
+    },
+    troco: {
+        type: Number,
+        default: 0,
+        min: 0
+    },
+    pagamentos_combinados: [{
+        forma: {
+            type: String,
+            enum: ['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'Pix Bradesco', 'Pix QR Code', 'Crediário Loja'],
+            required: true
+        },
+        valor: {
+            type: Number,
+            required: true,
+            min: 0
+        },
+        valor_pago: {
+            type: Number,
+            default: 0,
+            min: 0
+        },
+        troco: {
+            type: Number,
+            default: 0,
+            min: 0
+        }
+    }],
     taxa_entrega: {
         type: Number,
         default: 0
     },
-    valor_corrida:{
+    valor_corrida: {
         type: Number,
         default: 0
     },
@@ -111,16 +137,16 @@ const entregaSchema = new mongoose.Schema({
         default: 0
     },
     data_coleta: {
-        type: Date,
+        type: Date
     },
     data_entrega: {
-        type: Date,
+        type: Date
     },
     data_confirmacao: {
-        type: Date,
+        type: Date
     },
     cancelada_em: {
-        type: Date,
+        type: Date
     },
     cancelada_por: {
         type: mongoose.Schema.Types.ObjectId,

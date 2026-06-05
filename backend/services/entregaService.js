@@ -133,6 +133,9 @@ async function criarEntrega(dados, actor = {}) {
         observacoes: dados.observacoes || '',
         valor: dados.valor,
         forma_pagamento: dados.forma_pagamento,
+        valor_pago_dinheiro: dados.valor_pago_dinheiro || 0,
+        troco: dados.troco || 0,
+        pagamentos_combinados: dados.pagamentos_combinados || [],
         taxa_entrega: dados.taxa_entrega || 0,
         valor_corrida: dados.valor_corrida || 0,
         ordem: ultimaEntrega ? ultimaEntrega.ordem + 1 : 1,
@@ -309,6 +312,10 @@ async function confirmarEntrega(id, actor = {}) {
 
     if (entrega.status === 'Cancelada') {
         throw createError(409, 'Não é possível confirmar uma entrega cancelada');
+    }
+
+    if (entrega.status === 'Confirmada') {
+        throw createError(409, 'Entrega já confirmada');
     }
 
     entrega.status = 'Confirmada';

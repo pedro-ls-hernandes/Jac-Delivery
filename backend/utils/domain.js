@@ -1,5 +1,5 @@
 const CIDADES = ['Jaú', 'Mineiros', 'Dois Córregos'];
-const FORMAS_PAGAMENTO = ['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'Pix Bradesco', 'Pix QR Code', 'Crediário Loja'];
+const FORMAS_PAGAMENTO = ['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'Pix Bradesco', 'Pix QR Code', 'Crediário Loja', 'Pagamento Combinado'];
 const STATUS_ENTREGA = ['Não Coletada', 'Coletada', 'Em Rota', 'Entregue', 'Confirmada', 'Cancelada'];
 const TIPOS_ENTREGADOR = ['Registrado', 'Terceirizado'];
 

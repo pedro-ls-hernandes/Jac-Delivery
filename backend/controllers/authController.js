@@ -9,6 +9,16 @@ async function login(req, res, next) {
     }
 }
 
+async function registrarAdmin(req, res, next) {
+    try {
+        const admin = await authService.registrarAdmin(req.body);
+        return res.status(201).json(admin);
+    } catch (error) {
+        return next(error);
+    }
+}
+
 module.exports = {
-    login
+    login,
+    registrarAdmin
 };

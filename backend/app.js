@@ -11,7 +11,21 @@ const metricasRoutes = require('./routes/metricasRoutes');
 
 const app = express();
 
-app.use(cors());
+const corsOrigins = (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+app.use(cors({
+    origin(origin, callback) {
+        if (!origin || corsOrigins.length === 0 || corsOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        return callback(new Error('Origem não permitida pelo CORS'));
+    },
+    credentials: true
+}));
 app.use(express.json());
 
 app.get('/health', (req, res) => {
