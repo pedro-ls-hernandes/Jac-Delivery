@@ -1,6 +1,6 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faUserCheck, faUserSlash } from '@fortawesome/free-solid-svg-icons';
+import { faPenToSquare, faPlus, faUserCheck, faUserSlash } from '@fortawesome/free-solid-svg-icons';
 import { request } from '../api/client.js';
 import { DataTable } from '../components/DataTable.jsx';
 import { FormPanel, Input } from '../components/FormControls.jsx';
@@ -24,6 +24,21 @@ const INITIAL_FORM = {
   status: 'Ativo'
 };
 
+const EDITABLE_FIELDS = [
+  'name',
+  'cpf',
+  'telefone',
+  'email',
+  'logradouro',
+  'numero',
+  'bairro',
+  'cidade',
+  'numero_venda',
+  'user_login',
+  'password',
+  'status'
+];
+
 export function PessoasPage({ tipo, items, refresh, setMessage }) {
   const isEntregador = tipo === 'entregador';
   const endpoint = isEntregador ? '/entregadores' : '/vendedores';
@@ -31,18 +46,47 @@ export function PessoasPage({ tipo, items, refresh, setMessage }) {
   const singular = isEntregador ? 'entregador' : 'vendedor';
   const [form, setForm] = useState(INITIAL_FORM);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+
+  function openCreateModal() {
+    setEditingItem(null);
+    setForm(INITIAL_FORM);
+    setIsModalOpen(true);
+  }
+
+  function openEditModal(item) {
+    setEditingItem(item);
+    setForm({
+      ...INITIAL_FORM,
+      ...item,
+      password: ''
+    });
+    setIsModalOpen(true);
+  }
 
   function closeModal() {
     setIsModalOpen(false);
+    setEditingItem(null);
     setForm(INITIAL_FORM);
   }
 
   async function submit(event) {
     event.preventDefault();
+    const payload = EDITABLE_FIELDS.reduce((data, field) => {
+      data[field] = form[field];
+      return data;
+    }, {});
+
+    if (editingItem && !payload.password) {
+      delete payload.password;
+    }
 
     try {
-      await request(endpoint, { method: 'POST', body: JSON.stringify(form) });
-      setMessage(`${singular[0].toUpperCase()}${singular.slice(1)} cadastrado com sucesso.`);
+      await request(editingItem ? `${endpoint}/${editingItem._id}` : endpoint, {
+        method: editingItem ? 'PUT' : 'POST',
+        body: JSON.stringify(payload)
+      });
+      setMessage(`${singular[0].toUpperCase()}${singular.slice(1)} ${editingItem ? 'atualizado' : 'cadastrado'} com sucesso.`);
       closeModal();
       refresh();
     } catch (error) {
@@ -78,7 +122,7 @@ export function PessoasPage({ tipo, items, refresh, setMessage }) {
 
   return (
     <section className="page-stack">
-      <PageHeader title={title} actionLabel={`Cadastrar ${singular}`} onAction={() => setIsModalOpen(true)} actionIcon={faPlus} />
+      <PageHeader title={title} actionLabel={`Cadastrar ${singular}`} onAction={openCreateModal} actionIcon={faPlus} />
       <DataTable
         //title={title}
         rows={items}
@@ -87,10 +131,16 @@ export function PessoasPage({ tipo, items, refresh, setMessage }) {
           {
             label: 'Ações',
             render: (row) => (
-              <button onClick={() => status(row._id, row.status === 'Ativo' ? 'Inativo' : 'Ativo')}>
-                <FontAwesomeIcon icon={row.status === 'Ativo' ? faUserSlash : faUserCheck} />
-                {row.status === 'Ativo' ? 'Inativar' : 'Ativar'}
-              </button>
+              <div className="table-actions">
+                <button onClick={() => openEditModal(row)}>
+                  <FontAwesomeIcon icon={faPenToSquare} />
+                  Editar
+                </button>
+                <button onClick={() => status(row._id, row.status === 'Ativo' ? 'Inativo' : 'Ativo')}>
+                  <FontAwesomeIcon icon={row.status === 'Ativo' ? faUserSlash : faUserCheck} />
+                  {row.status === 'Ativo' ? 'Inativar' : 'Ativar'}
+                </button>
+              </div>
             )
           }
         ]}
@@ -98,8 +148,8 @@ export function PessoasPage({ tipo, items, refresh, setMessage }) {
       />
 
       {isModalOpen && (
-        <Modal title={`Cadastrar ${singular}`} onClose={closeModal}>
-          <FormPanel title={`Dados do ${singular}`} onSubmit={submit} submitLabel="Salvar cadastro">
+        <Modal title={`${editingItem ? 'Editar' : 'Cadastrar'} ${singular}`} onClose={closeModal}>
+          <FormPanel title={`Dados do ${singular}`} onSubmit={submit} submitLabel={editingItem ? 'Salvar alterações' : 'Salvar cadastro'}>
             <Input label="Nome" value={form.name} set={(value) => setForm({ ...form, name: value })} />
             {isEntregador ? (
               <>
@@ -122,3 +172,4 @@ export function PessoasPage({ tipo, items, refresh, setMessage }) {
     </section>
   );
 }
+

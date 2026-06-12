@@ -1,10 +1,10 @@
-const Entrega = require('../models/Entrega');
+﻿const Entrega = require('../models/Entrega');
 const Cliente = require('../models/Cliente');
 const Vendedor = require('../models/Vendedor');
 const Entregador = require('../models/Entregador');
 const clienteService = require('./clienteService');
 const metricasService = require('./metricasService');
-const { CIDADES, FORMAS_PAGAMENTO, STATUS_ENTREGA, normalizarTelefone } = require('../utils/domain');
+const { CIDADES, FORMAS_PAGAMENTO, STATUS_ENTREGA, normalizarTelefone} = require('../utils/domain');
 const { createError } = require('../utils/http');
 
 function isObjectId(value) {
@@ -13,6 +13,16 @@ function isObjectId(value) {
 
 function sanitizarEntrega(entrega) {
     return entrega;
+}
+
+function getLocalDayRange(date = new Date()) {
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
+    return { start, end };
 }
 
 async function buscarVendedorValido(vendedorId, actor) {
@@ -117,6 +127,13 @@ async function criarEntrega(dados, actor = {}) {
         ],
         status: { $ne: 'Cancelada' }
     }).sort({ ordem: -1 });
+    const hoje = getLocalDayRange();
+    const ultimaEntregaDoDia = await Entrega.findOne({
+        data_criacao: { $gte: hoje.start, $lte: hoje.end }
+    }).sort({ ordem_cadastro_dia: -1, ordem: -1 });
+    const ordemCadastroDia = ultimaEntregaDoDia
+        ? Number(ultimaEntregaDoDia.ordem_cadastro_dia || ultimaEntregaDoDia.ordem || 0) + 1
+        : 1;
 
     const entrega = await Entrega.create({
         cliente_id: cliente._id,
@@ -139,6 +156,7 @@ async function criarEntrega(dados, actor = {}) {
         taxa_entrega: dados.taxa_entrega || 0,
         valor_corrida: dados.valor_corrida || 0,
         ordem: ultimaEntrega ? ultimaEntrega.ordem + 1 : 1,
+        ordem_cadastro_dia: ordemCadastroDia,
         status: 'Não Coletada'
     });
 
@@ -251,8 +269,8 @@ async function coletarEntrega(id, actor = {}) {
         throw createError(403, 'Acesso negado');
     }
 
-    if (entrega.status === 'Cancelada' || entrega.status === 'Confirmada') {
-        throw createError(409, 'Não é possível alterar uma entrega finalizada');
+    if (entrega.status !== STATUS_ENTREGA[0]) {
+        throw createError(409, 'Esta entrega já foi coletada ou finalizada');
     }
 
     entrega.status = 'Coletada';
@@ -327,16 +345,26 @@ async function confirmarEntrega(id, actor = {}) {
     return buscarEntregaPorId(entrega._id, actor);
 }
 
-async function cancelarEntrega(id, actor = {}) {
+async function cancelarEntrega(id, justificativa, actor = {}) {
     const entrega = await Entrega.findById(id);
 
     if (!entrega) {
         throw createError(404, 'Entrega não encontrada');
     }
 
+    if (entrega.status === 'Cancelada') {
+        throw createError(409, 'Entrega já cancelada');
+    }
+
+    if (!String(justificativa || '').trim()) {
+        throw createError(400, 'Justificativa de cancelamento é obrigatória');
+    }
+
     entrega.status = 'Cancelada';
     entrega.cancelada_em = new Date();
     entrega.cancelada_por = actor.role === 'admin' ? actor.id : entrega.cancelada_por;
+    entrega.justificativa_cancelamento = String(justificativa).trim();
+    entrega.motivo_cancelamento = String(justificativa).trim();
     await entrega.save();
 
     await metricasService.registrarCancelamento(entrega.cancelada_em);
@@ -346,6 +374,10 @@ async function cancelarEntrega(id, actor = {}) {
 
 async function atualizarEntrega(id, dados, actor = {}) {
     const entrega = await Entrega.findById(id);
+
+    if (Array.isArray(dados.pagamentos_combinados)) {
+        dados.pagamentos_combinados = dados.pagamentos_combinados.map((item) => ({ ...item, forma: normalizarFormaPagamento(item.forma) }));
+    }
 
     if (!entrega) {
         throw createError(404, 'Entrega não encontrada');
@@ -381,3 +413,4 @@ module.exports = {
     cancelarEntrega,
     atualizarEntrega
 };
+

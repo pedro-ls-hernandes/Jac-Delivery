@@ -1,9 +1,12 @@
+﻿import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMotorcycle, faPlusCircle, faStore } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faMotorcycle, faPlusCircle, faPrint, faStore } from '@fortawesome/free-solid-svg-icons';
 import { DataTable } from '../components/DataTable.jsx';
+import { DeliveryDetailsModal } from '../components/DeliveryDetailsModal.jsx';
 import { deliveryColumns } from '../components/DeliveryColumns.jsx';
 import { isTodayDelivery, sortDeliveriesByDayOrder } from '../utils/deliverySort.js';
 import { money } from '../utils/format.js';
+import { printDeliveryReceipt } from '../utils/receiptPrinter.js';
 
 function Metric({ title, value, detail, tone = 'info' }) {
   return (
@@ -16,6 +19,7 @@ function Metric({ title, value, detail, tone = 'info' }) {
 }
 
 export function DashboardPage({ data, go }) {
+  const [selectedEntrega, setSelectedEntrega] = useState(null);
   const terceirizadas = data.entregas.filter((item) => item.tipo_entregador === 'Terceirizado');
   const ativos = data.entregadores.filter((item) => item.status === 'Ativo');
   const entregasHoje = data.entregas.filter(isTodayDelivery);
@@ -39,7 +43,25 @@ export function DashboardPage({ data, go }) {
         <button className="secondary" onClick={() => go('vendedores')}><FontAwesomeIcon icon={faStore} />Cadastrar vendedor</button>
         <button className="secondary" onClick={() => go('entregadores')}><FontAwesomeIcon icon={faMotorcycle} />Cadastrar entregador</button>
       </div>
-      <DataTable title="Entregas do dia em andamento" rows={pendentes.slice(0, 8)} columns={deliveryColumns({ showDailyOrder: true })} empty="Nenhuma entrega em andamento hoje." />
+      <DataTable
+        title="Entregas do dia em andamento"
+        rows={pendentes.slice(0, 8)}
+        columns={[
+          ...deliveryColumns({ showDailyOrder: true }),
+          {
+            label: 'Ações',
+            render: (row) => (
+              <div className="table-actions">
+                <button onClick={() => setSelectedEntrega(row)}><FontAwesomeIcon icon={faEye} />Detalhes</button>
+                <button onClick={() => printDeliveryReceipt(row)}><FontAwesomeIcon icon={faPrint} />Reimprimir</button>
+              </div>
+            )
+          }
+        ]}
+        empty="Nenhuma entrega em andamento hoje."
+      />
+      {selectedEntrega && <DeliveryDetailsModal entrega={selectedEntrega} onClose={() => setSelectedEntrega(null)} />}
     </section>
   );
 }
+

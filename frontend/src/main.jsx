@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarDay, faMotorcycle, faRightFromBracket, faTruckFast } from '@fortawesome/free-solid-svg-icons';
@@ -215,3 +215,4 @@ function CurrentPage({ page, data, setData, setPage, refresh, setMessage }) {
 }
 
 createRoot(document.getElementById('root')).render(<App />);
+

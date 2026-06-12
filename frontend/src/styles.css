@@ -1,17 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Hurricane&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Hurricane&display=swap');
 
 :root {
   --menu: #141528;
   --header: #3F4591;
   --black: #101010;
-  --white: #ffffff;
-  --line: #e8e8ee;
+  --white: #fffaf6;
+  --field: #ffffff;
+  --line: #efe2d8;
   --muted: #666875;
-  --soft: #f6f6f8;
-  --success: #48BA59;
-  --danger: #FF6262;
-  --warning: #FFD037;
-  --info: #1f6fb5;
+  --soft: #fff3ea;
+  --success: #247a36;
+  --danger: #c43131;
+  --warning: #9a6a00;
+  --info: #15558f;
 }
 
 * {
@@ -58,7 +59,16 @@ textarea {
   border-radius: 6px;
   padding: 10px 12px;
   color: var(--black);
-  background: var(--white);
+  background: var(--field);
+}
+
+.scrollable-select {
+  min-height: 150px;
+  overflow-y: auto;
+}
+
+.scrollable-select option {
+  padding: 8px 10px;
 }
 
 textarea {
@@ -284,7 +294,7 @@ label {
 }
 
 .metric-card.metric-warning strong {
-  color: #8a6500;
+  color: var(--warning);
 }
 
 .metric-card.metric-info strong {
@@ -427,8 +437,8 @@ td > button {
   min-height: 30px;
   padding: 5px 10px;
   border-radius: 999px;
-  color: var(--danger);
-  background: #fff1f1;
+  color: var(--white);
+  background: var(--danger);
   font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
@@ -714,6 +724,56 @@ td > button {
   background: var(--soft);
 }
 
+.details-panel {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.details-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.detail-item,
+.detail-list {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--soft);
+}
+
+.detail-item span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.detail-item strong {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+
+.detail-list h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.detail-payment {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .split-page {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
@@ -783,6 +843,22 @@ td > button {
   margin: 0;
   color: var(--success);
   font-weight: 800;
+}
+
+.confirm-panel {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.confirm-panel h2,
+.confirm-panel p {
+  margin: 0;
+}
+
+.confirm-panel p {
+  color: var(--muted);
+  font-weight: 700;
 }
 
 .field-hint {
@@ -884,6 +960,15 @@ td > button {
   }
 
   .table-report-controls button {
+    width: 100%;
+  }
+
+  .details-grid,
+  .detail-payment {
+    grid-template-columns: 1fr;
+  }
+
+  .details-actions button {
     width: 100%;
   }
 
@@ -995,3 +1080,4 @@ td > button {
     min-width: 640px;
   }
 }
+

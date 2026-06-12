@@ -1,13 +1,16 @@
-import { useMemo, useState } from 'react';
+﻿import { useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChartPie, faFileExport, faFilter } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faEye, faFileExport, faFilter, faPrint } from '@fortawesome/free-solid-svg-icons';
 import { DataTable } from '../components/DataTable.jsx';
+import { DeliveryDetailsModal } from '../components/DeliveryDetailsModal.jsx';
 import { deliveryColumns } from '../components/DeliveryColumns.jsx';
 import { Input, Select } from '../components/FormControls.jsx';
 import { Modal } from '../components/Modal.jsx';
 import { PageHeader } from '../components/PageHeader.jsx';
+import { isTodayDelivery } from '../utils/deliverySort.js';
 import { getName, money } from '../utils/format.js';
 import { generateDeliveriesPdf } from '../utils/reportPdf.js';
+import { printDeliveryReceipt } from '../utils/receiptPrinter.js';
 
 const STATUS_GROUPS = {
   confirmadas: {
@@ -229,39 +232,58 @@ export function RelatoriosPage({ data }) {
     fim: toDateInput(weekRange.end)
   });
   const [filters, setFilters] = useState({
-    inicio: toDateInput(weekRange.start),
-    fim: toDateInput(weekRange.end),
     status: '',
     vendedor: '',
     entregador: '',
     cidade: ''
   });
-  const [draftFilters, setDraftFilters] = useState(filters);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [draftFilters, setDraftFilters] = useState({ ...filters, ...tableRange });
+  const [reportDraftFilters, setReportDraftFilters] = useState({ ...filters, ...tableRange });
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [selectedEntrega, setSelectedEntrega] = useState(null);
 
-  const reportRows = useMemo(() => applyFilters(data.entregas, filters), [data.entregas, filters]);
-  const tableRows = useMemo(() => applyFilters(reportRows, { ...tableRange, status: '', vendedor: '', entregador: '', cidade: '' }), [reportRows, tableRange]);
+  const tableFilters = useMemo(() => ({ ...filters, ...tableRange }), [filters, tableRange]);
+  const tableRows = useMemo(() => (
+    applyFilters(data.entregas, tableFilters).sort((first, second) => getEntregaDate(second) - getEntregaDate(first))
+  ), [data.entregas, tableFilters]);
   const weekData = useMemo(() => buildWeekData(data.entregas), [data.entregas]);
-  const totals = useMemo(() => buildTotals(reportRows), [reportRows]);
+  const totals = useMemo(() => buildTotals(tableRows), [tableRows]);
+  const cityOptions = useMemo(() => (
+    Array.from(new Set(data.entregas.map((item) => item.cidade).filter(Boolean)))
+  ), [data.entregas]);
+
+  function openFilterModal() {
+    setDraftFilters({ ...filters, ...tableRange });
+    setIsFilterModalOpen(true);
+  }
 
   function openReportModal() {
-    setDraftFilters(filters);
-    setIsModalOpen(true);
+    setIsReportModalOpen(true);
+  }
+
+  function applyAdvancedFilters(event) {
+    event.preventDefault();
+    setFilters({
+      status: draftFilters.status,
+      vendedor: draftFilters.vendedor,
+      entregador: draftFilters.entregador,
+      cidade: draftFilters.cidade
+    });
+    setTableRange({ inicio: draftFilters.inicio, fim: draftFilters.fim });
+    setIsFilterModalOpen(false);
   }
 
   function generateReport(event) {
     event.preventDefault();
-    const filteredRows = applyFilters(data.entregas, draftFilters);
-    const pdfFilters = {
-      ...draftFilters,
-      vendedorNome: findNameById(data.vendedores, draftFilters.vendedor, (item) => `${item.name} - Nº ${item.numero_venda}`),
-      entregadorNome: findNameById(data.entregadores, draftFilters.entregador)
-    };
+    const rows = applyFilters(data.entregas, reportDraftFilters);
 
-    setFilters(draftFilters);
-    setTableRange({ inicio: draftFilters.inicio, fim: draftFilters.fim });
-    setIsModalOpen(false);
-    generateDeliveriesPdf(filteredRows, pdfFilters);
+    generateDeliveriesPdf(rows, {
+      ...reportDraftFilters,
+      vendedorNome: findNameById(data.vendedores, reportDraftFilters.vendedor, (item) => `${item.name} - Nº ${item.numero_venda}`),
+      entregadorNome: findNameById(data.entregadores, reportDraftFilters.entregador)
+    });
+    setIsReportModalOpen(false);
   }
 
   return (
@@ -286,7 +308,7 @@ export function RelatoriosPage({ data }) {
       <div className="table-report-controls">
         <Input label="De" type="date" value={tableRange.inicio} set={(value) => setTableRange({ ...tableRange, inicio: value })} />
         <Input label="Até" type="date" value={tableRange.fim} set={(value) => setTableRange({ ...tableRange, fim: value })} />
-        <button className="secondary" type="button" onClick={openReportModal}><FontAwesomeIcon icon={faFilter} />Filtros avançados</button>
+        <button className="secondary" type="button" onClick={openFilterModal}><FontAwesomeIcon icon={faFilter} />Filtros avançados</button>
       </div>
 
       <DataTable
@@ -294,26 +316,71 @@ export function RelatoriosPage({ data }) {
         rows={tableRows}
         columns={[
           { label: 'Data', render: (row) => getEntregaDate(row).toLocaleDateString('pt-BR') },
-          ...deliveryColumns()
+          ...deliveryColumns(),
+          {
+            label: 'Ações',
+            render: (row) => (
+              <div className="table-actions">
+                <button onClick={() => setSelectedEntrega(row)}><FontAwesomeIcon icon={faEye} />Detalhes</button>
+                {isTodayDelivery(row) && row.status !== 'Cancelada' && (
+                  <button onClick={() => printDeliveryReceipt(row)}><FontAwesomeIcon icon={faPrint} />Reimprimir</button>
+                )}
+              </div>
+            )
+          }
         ]}
         empty="Sem entregas para listar."
       />
 
-      {isModalOpen && (
-        <Modal title="Gerar relatório" onClose={() => setIsModalOpen(false)}>
-          <form className="form-panel" onSubmit={generateReport}>
-            <h2>Período e filtros</h2>
+      {selectedEntrega && <DeliveryDetailsModal entrega={selectedEntrega} onClose={() => setSelectedEntrega(null)} />}
+
+      {isFilterModalOpen && (
+        <Modal title="Filtros avançados" onClose={() => setIsFilterModalOpen(false)}>
+          <form className="form-panel" onSubmit={applyAdvancedFilters}>
+            <h2>Filtros avançados</h2>
             <div className="form-grid">
               <Input label="Data inicial" type="date" value={draftFilters.inicio} set={(value) => setDraftFilters({ ...draftFilters, inicio: value })} />
               <Input label="Data final" type="date" value={draftFilters.fim} set={(value) => setDraftFilters({ ...draftFilters, fim: value })} />
               <Select label="Status" value={draftFilters.status} set={(value) => setDraftFilters({ ...draftFilters, status: value })} options={[{ value: '', label: 'Todos' }, 'Confirmada', 'Cancelada', 'Não Coletada', 'Coletada', 'Em Rota', 'Entregue']} required={false} />
               <Select label="Vendedor" value={draftFilters.vendedor} set={(value) => setDraftFilters({ ...draftFilters, vendedor: value })} options={[{ value: '', label: 'Todos' }, ...data.vendedores.map((item) => ({ value: item._id, label: `${item.name} - Nº ${item.numero_venda}` }))]} required={false} />
               <Select label="Entregador" value={draftFilters.entregador} set={(value) => setDraftFilters({ ...draftFilters, entregador: value })} options={[{ value: '', label: 'Todos' }, ...data.entregadores.map((item) => ({ value: item._id, label: item.name }))]} required={false} />
-              <Select label="Cidade" value={draftFilters.cidade} set={(value) => setDraftFilters({ ...draftFilters, cidade: value })} options={[{ value: '', label: 'Todas' }, ...Array.from(new Set(data.entregas.map((item) => item.cidade).filter(Boolean)))]} required={false} />
+              <label>
+                Cidade
+                <select className="scrollable-select" size={Math.min(6, cityOptions.length + 1)} value={draftFilters.cidade} onChange={(event) => setDraftFilters({ ...draftFilters, cidade: event.target.value })}>
+                  <option value="">Todas</option>
+                  {cityOptions.map((cidade) => <option key={cidade} value={cidade}>{cidade}</option>)}
+                </select>
+              </label>
             </div>
             <div className="form-actions">
-              <button type="button" className="cancel" onClick={() => setIsModalOpen(false)}>Cancelar</button>
-              <button type="submit" className="primary"><FontAwesomeIcon icon={faChartPie} />Gerar relatório</button>
+              <button type="button" className="cancel" onClick={() => setIsFilterModalOpen(false)}>Cancelar</button>
+              <button type="submit" className="primary"><FontAwesomeIcon icon={faCheck} />Aplicar filtros</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {isReportModalOpen && (
+        <Modal title="Gerar relatório" onClose={() => setIsReportModalOpen(false)}>
+          <form className="form-panel" onSubmit={generateReport}>
+            <h2>Configurar relatório</h2>
+            <div className="form-grid">
+              <Input label="Data inicial" type="date" value={reportDraftFilters.inicio} set={(value) => setReportDraftFilters({ ...reportDraftFilters, inicio: value })} />
+              <Input label="Data final" type="date" value={reportDraftFilters.fim} set={(value) => setReportDraftFilters({ ...reportDraftFilters, fim: value })} />
+              <Select label="Status" value={reportDraftFilters.status} set={(value) => setReportDraftFilters({ ...reportDraftFilters, status: value })} options={[{ value: '', label: 'Todos' }, 'Confirmada', 'Cancelada', 'Não Coletada', 'Coletada', 'Em Rota', 'Entregue']} required={false} />
+              <Select label="Vendedor" value={reportDraftFilters.vendedor} set={(value) => setReportDraftFilters({ ...reportDraftFilters, vendedor: value })} options={[{ value: '', label: 'Todos' }, ...data.vendedores.map((item) => ({ value: item._id, label: `${item.name} - Nº ${item.numero_venda}` }))]} required={false} />
+              <Select label="Entregador" value={reportDraftFilters.entregador} set={(value) => setReportDraftFilters({ ...reportDraftFilters, entregador: value })} options={[{ value: '', label: 'Todos' }, ...data.entregadores.map((item) => ({ value: item._id, label: item.name }))]} required={false} />
+              <label>
+                Cidade
+                <select className="scrollable-select" size={Math.min(6, cityOptions.length + 1)} value={reportDraftFilters.cidade} onChange={(event) => setReportDraftFilters({ ...reportDraftFilters, cidade: event.target.value })}>
+                  <option value="">Todas</option>
+                  {cityOptions.map((cidade) => <option key={cidade} value={cidade}>{cidade}</option>)}
+                </select>
+              </label>
+            </div>
+            <div className="form-actions">
+              <button type="button" className="cancel" onClick={() => setIsReportModalOpen(false)}>Cancelar</button>
+              <button type="submit" className="primary"><FontAwesomeIcon icon={faFileExport} />Gerar relatório</button>
             </div>
           </form>
         </Modal>
@@ -321,3 +388,6 @@ export function RelatoriosPage({ data }) {
     </section>
   );
 }
+
+
+

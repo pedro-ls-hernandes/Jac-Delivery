@@ -1,4 +1,5 @@
-import { getName, money } from './format.js';
+﻿import { getName, money } from './format.js';
+import logoUrl from '../assets/logo.png';
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -46,6 +47,7 @@ function paymentDetails(entrega) {
 }
 
 function buildReceiptHtml(entrega) {
+  const numeroPedido = entrega.ordem_cadastro_dia || entrega.ordem || entrega.cadastro_loja || entrega._id || '';
   const endereco = [
     entrega.logradouro,
     entrega.numero ? `Nº ${entrega.numero}` : '',
@@ -58,7 +60,7 @@ function buildReceiptHtml(entrega) {
     <html lang="pt-BR">
       <head>
         <meta charset="utf-8" />
-        <title>Entrega ${escapeHtml(entrega.cadastro_loja || entrega._id || '')}</title>
+        <title>Entrega ${escapeHtml(numeroPedido)}</title>
         <style>
           @page { size: 80mm auto; margin: 4mm; }
           * { box-sizing: border-box; }
@@ -66,43 +68,72 @@ function buildReceiptHtml(entrega) {
             margin: 0;
             color: #000;
             background: #fff;
-            font-family: "Courier New", monospace;
-            font-size: 12px;
-            line-height: 1.35;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 1.42;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
           .receipt { width: 72mm; margin: 0 auto; }
           .center { text-align: center; }
+          .logo {
+            display: block;
+            width: 38mm;
+            max-height: 22mm;
+            object-fit: contain;
+            margin: 0 auto 5px;
+            filter: contrast(1.18) saturate(0);
+          }
           h1 {
-            margin: 0 0 6px;
-            font-size: 17px;
+            margin: 0 0 5px;
+            font-size: 21px;
+            font-weight: 900;
             letter-spacing: 0;
             text-transform: uppercase;
           }
-          .muted { margin: 0 0 8px; font-size: 11px; }
+          .muted {
+            margin: 0 0 7px;
+            font-size: 13px;
+            font-weight: 700;
+          }
           .divider {
-            margin: 8px 0;
-            border-top: 1px dashed #000;
+            margin: 10px 0;
+            border-top: 2px dashed #000;
           }
           .line {
             display: grid;
-            grid-template-columns: 26mm 1fr;
-            gap: 4px;
-            margin: 3px 0;
+            grid-template-columns: 29mm 1fr;
+            gap: 5px;
+            margin: 5px 0;
             word-break: break-word;
           }
-          .line strong { text-transform: uppercase; }
+          .line strong {
+            font-size: 13px;
+            font-weight: 900;
+            text-transform: uppercase;
+          }
+          .line span {
+            font-size: 15px;
+            font-weight: 800;
+          }
           .total {
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid #000;
-            font-size: 14px;
-            font-weight: 700;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid #000;
+          }
+          .total strong,
+          .total span {
+            font-size: 19px;
+            font-weight: 900;
           }
           .obs {
-            margin-top: 8px;
-            padding: 6px 0;
-            border-top: 1px dashed #000;
-            border-bottom: 1px dashed #000;
+            margin-top: 10px;
+            padding: 8px 0;
+            border-top: 2px dashed #000;
+            border-bottom: 2px dashed #000;
+            font-size: 15px;
+            font-weight: 800;
             white-space: pre-wrap;
           }
           @media print {
@@ -113,27 +144,25 @@ function buildReceiptHtml(entrega) {
       <body>
         <main class="receipt">
           <section class="center">
+            <img class="logo" src="${logoUrl}" alt="Jac Delivery" />
             <h1>Jac Delivery</h1>
             <p class="muted">Comprovante de entrega</p>
             <p class="muted">${escapeHtml(new Date().toLocaleString('pt-BR'))}</p>
           </section>
           <div class="divider"></div>
-          ${line('Pedido', entrega.cadastro_loja || entrega._id)}
+          ${line('Pedido', numeroPedido)}
           ${line('Cliente', entrega.cliente)}
           ${line('Telefone', entrega.telefone)}
           ${line('Endereço', endereco)}
           ${line('Vendedor', getName(entrega.vendedor))}
           ${line('Entregador', getEntregadorName(entrega))}
-          ${line('Tipo', entrega.tipo_entregador)}
           ${line('Pagamento', entrega.forma_pagamento)}
-          ${line('Status', entrega.status)}
           <div class="divider"></div>
           ${line('Valor', money(entrega.valor))}
-          ${line('Taxa', money(entrega.taxa_entrega))}
-          ${line('Corrida', money(entrega.valor_corrida))}
-          <div class="line total"><strong>Total</strong><span>${escapeHtml(money(Number(entrega.valor || 0) + Number(entrega.taxa_entrega || 0)))}</span></div>
+          ${line('Taxa de entrega', money(entrega.taxa_entrega))}
+          <div class="line total"><strong>Total</strong><span>${escapeHtml(money(entrega.valor))}</span></div>
           ${paymentDetails(entrega)}
-          ${entrega.observacoes ? `<div class="obs"><strong>Observações</strong><br />${escapeHtml(entrega.observacoes)}</div>` : ''}
+          ${entrega.observacoes ? `<div class="obs"><strong>Observações:</strong><br />${escapeHtml(entrega.observacoes)}</div>` : ''}
           <div class="divider"></div>
           <p class="center muted">Via do entregador</p>
         </main>
@@ -166,3 +195,4 @@ export function printDeliveryReceipt(entrega) {
     window.setTimeout(() => frame.remove(), 1000);
   }, 150);
 }
+

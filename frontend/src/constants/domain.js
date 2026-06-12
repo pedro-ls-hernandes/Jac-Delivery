@@ -1,4 +1,4 @@
-import {
+﻿import {
   faChartLine,
   faClipboardList,
   faFileInvoiceDollar,
@@ -36,3 +36,4 @@ export const MENU_ITEMS = [
   { id: 'vendedores', label: 'Vendedores', icon: faStore },
   { id: 'entregadores', label: 'Entregadores', icon: faMotorcycle }
 ];
+

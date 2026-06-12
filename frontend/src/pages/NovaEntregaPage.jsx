@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { request } from '../api/client.js';
@@ -34,9 +34,7 @@ export function NovaEntregaPage({ data, refresh, setMessage, navigate }) {
   const [pagamentosCombinados, setPagamentosCombinados] = useState([{ ...INITIAL_PAYMENT }]);
   const [clienteStatus, setClienteStatus] = useState('');
 
-  const totalPedido = useMemo(() => (
-    parseCurrencyInput(form.valor) + parseCurrencyInput(form.taxa_entrega)
-  ), [form.valor, form.taxa_entrega]);
+  const totalPedido = useMemo(() => parseCurrencyInput(form.valor), [form.valor]);
 
   const trocoDinheiro = Math.max(parseCurrencyInput(form.valor_pago_dinheiro) - totalPedido, 0);
   const isDinheiro = form.forma_pagamento === 'Dinheiro';

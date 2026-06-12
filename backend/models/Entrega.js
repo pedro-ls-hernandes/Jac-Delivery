@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+﻿const mongoose = require('mongoose');
 const { randomUUID } = require('crypto');
 
 const entregaSchema = new mongoose.Schema({
@@ -136,6 +136,10 @@ const entregaSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    ordem_cadastro_dia: {
+        type: Number,
+        default: 0
+    },
     data_coleta: {
         type: Date
     },
@@ -153,6 +157,16 @@ const entregaSchema = new mongoose.Schema({
         ref: 'Admin',
         default: null
     },
+    justificativa_cancelamento: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+    motivo_cancelamento: {
+        type: String,
+        trim: true,
+        default: ''
+    },
     coletada_por: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Entregador',
@@ -167,3 +181,4 @@ const entregaSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('Entrega', entregaSchema);
+

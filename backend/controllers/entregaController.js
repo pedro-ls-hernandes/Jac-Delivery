@@ -65,7 +65,8 @@ async function confirmarEntrega(req, res, next) {
 
 async function cancelarEntrega(req, res, next) {
     try {
-        const entrega = await entregaService.cancelarEntrega(req.params.id, req.user || {});
+        const justificativa = req.body.justificativa || req.body.justificativa_cancelamento || req.body.motivo || req.body.motivo_cancelamento;
+        const entrega = await entregaService.cancelarEntrega(req.params.id, justificativa, req.user || {});
         return res.status(200).json(entrega);
     } catch (error) {
         return next(error);

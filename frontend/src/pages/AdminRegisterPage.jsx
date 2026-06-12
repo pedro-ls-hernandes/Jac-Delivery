@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faUserShield } from '@fortawesome/free-solid-svg-icons';
 import { request } from '../api/client.js';
@@ -52,3 +52,4 @@ export function AdminRegisterPage({ onBack }) {
     </main>
   );
 }
+
