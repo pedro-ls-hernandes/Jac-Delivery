@@ -159,4 +159,4 @@ Este projeto foi idealizado e implementado como parte dos requisitos práticos d
 
 ---
 
-> Desenvolvido por **Pedro Hernandes** - Sinta-se à vontade para entrar em contato via [LinkedIn]([https://www.google.com/search?q=seu-link-aqui](https://www.linkedin.com/in/pedro-ls-hernandes/).
+> Desenvolvido por **Pedro Hernandes** - Sinta-se à vontade para entrar em contato via [LinkedIn](https://www.linkedin.com/in/pedro-ls-hernandes/).
