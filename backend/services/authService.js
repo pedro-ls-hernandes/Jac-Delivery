@@ -16,10 +16,14 @@ function gerarToken(payload) {
 }
 
 async function login({ role, identificador, login, username, email, password }) {
-	const usuario = identificador || login || username || email;
+	const usuario = String(identificador || login || username || email || '').trim();
 
 	if (!usuario || !password) {
 		throw createError(400, 'Identificador e senha são obrigatórios');
+	}
+
+	if (!['admin', 'vendedor', 'entregador'].includes(role)) {
+		throw createError(400, 'Perfil de acesso inválido');
 	}
 
 	let registro = null;

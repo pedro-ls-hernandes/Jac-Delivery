@@ -14,7 +14,10 @@ export function LoginPage({ onLogin, onRegisterAdmin }) {
     try {
       const result = await request('/auth/login', {
         method: 'POST',
-        body: JSON.stringify(form)
+        body: JSON.stringify({
+          ...form,
+          identificador: form.identificador.trim()
+        })
       });
       localStorage.setItem('jac_token', result.token);
       localStorage.setItem('jac_user', JSON.stringify(result.user));

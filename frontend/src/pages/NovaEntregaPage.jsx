@@ -21,13 +21,44 @@ const INITIAL_FORM = {
   terceirizado_telefone: '',
   valor: '',
   taxa_entrega: '',
-  valor_corrida: '',
   forma_pagamento: 'Dinheiro',
   valor_pago_dinheiro: '',
   observacoes: ''
 };
 
 const INITIAL_PAYMENT = { forma: 'Dinheiro', valor: '', valor_pago: '' };
+const TIPOS_ENTREGADOR = ['Registrado', 'Terceirizado'];
+
+function DeliveryTypeRadio({ value, set }) {
+  return (
+    <fieldset className="delivery-type-radio full">
+      <legend>Tipo de entregador</legend>
+      <div className="delivery-type-options">
+        {TIPOS_ENTREGADOR.map((tipo) => (
+          <label className={value === tipo ? 'delivery-type-option active' : 'delivery-type-option'} key={tipo}>
+            <input
+              type="radio"
+              name="tipo_entregador"
+              value={tipo}
+              checked={value === tipo}
+              onChange={(event) => set(event.target.value)}
+            />
+            <span>{tipo}</span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+function FormSection({ title, children }) {
+  return (
+    <section className="form-section full">
+      <h3>{title}</h3>
+      <div className="form-section-grid">{children}</div>
+    </section>
+  );
+}
 
 export function NovaEntregaPage({ data, refresh, setMessage, navigate }) {
   const [form, setForm] = useState(INITIAL_FORM);
@@ -116,7 +147,6 @@ export function NovaEntregaPage({ data, refresh, setMessage, navigate }) {
       ...form,
       valor: parseCurrencyInput(form.valor),
       taxa_entrega: parseCurrencyInput(form.taxa_entrega),
-      valor_corrida: parseCurrencyInput(form.valor_corrida),
       valor_pago_dinheiro: isDinheiro ? parseCurrencyInput(form.valor_pago_dinheiro) : 0,
       troco: isDinheiro ? trocoDinheiro : 0,
       pagamentos_combinados: pagamentos,
@@ -141,65 +171,71 @@ export function NovaEntregaPage({ data, refresh, setMessage, navigate }) {
 
   return (
     <FormPanel title="Registrar nova entrega" onSubmit={submit} submitLabel="Criar entrega">
+      <FormSection title="Informações do cliente">
+        <Input label="Telefone" value={form.telefone} set={(value) => setForm({ ...form, telefone: formatPhone(value) })} pattern="\(\d{2}\) \d{4,5}-\d{4}" title="Use o formato (xx) xxxxx-xxxx ou (xx) xxxx-xxxx" />
+        {form.telefone && !isValidPhone(form.telefone) && <p className="field-hint full">Digite um telefone válido no formato (xx) xxxxx-xxxx ou (xx) xxxx-xxxx.</p>}
+        {clienteStatus && <p className="field-hint full">{clienteStatus}</p>}
+        <Input label="Cliente" value={form.cliente} set={(value) => setForm({ ...form, cliente: value })} />
+      </FormSection>
 
-      <Input label="Telefone" value={form.telefone} set={(value) => setForm({ ...form, telefone: formatPhone(value) })} pattern="\(\d{2}\) \d{4,5}-\d{4}" title="Use o formato (xx) xxxxx-xxxx ou (xx) xxxx-xxxx" />
-      {form.telefone && !isValidPhone(form.telefone) && <p className="field-hint full">Digite um telefone válido no formato (xx) xxxxx-xxxx ou (xx) xxxx-xxxx.</p>}
-      {clienteStatus && <p className="field-hint full">{clienteStatus}</p>}
-      <Input label="Cliente" value={form.cliente} set={(value) => setForm({ ...form, cliente: value })} />
-      <Input label="Logradouro" value={form.logradouro} set={(value) => setForm({ ...form, logradouro: value })} />
-      <Input label="Número" value={form.numero} set={(value) => setForm({ ...form, numero: value })} required={false} />
-      <Input label="Bairro" value={form.bairro} set={(value) => setForm({ ...form, bairro: value })} />
-      <Select label="Cidade" value={form.cidade} set={(value) => setForm({ ...form, cidade: value })} options={CIDADES} />
-      <Select label="Vendedor" value={form.vendedor} set={(value) => setForm({ ...form, vendedor: value })} options={data.vendedores.filter((item) => item.status === 'Ativo').map((item) => ({ value: item._id, label: `${item.name} - Nº ${item.numero_venda}` }))} />
-      <Select label="Tipo de entregador" value={form.tipo_entregador} set={(value) => setForm({ ...form, tipo_entregador: value })} options={['Registrado', 'Terceirizado']} />
-      {form.tipo_entregador === 'Registrado' ? (
-        <Select label="Entregador" value={form.entregador} set={(value) => setForm({ ...form, entregador: value })} options={data.entregadores.filter((item) => item.status === 'Ativo').map((item) => ({ value: item._id, label: item.name }))} />
-      ) : (
-        <>
-          <Input label="Nome terceirizado" value={form.terceirizado_nome} set={(value) => setForm({ ...form, terceirizado_nome: value })} />
-          <Input label="Telefone terceirizado" value={form.terceirizado_telefone} set={(value) => setForm({ ...form, terceirizado_telefone: formatPhone(value) })} pattern="\(\d{2}\) \d{4,5}-\d{4}" title="Use o formato (xx) xxxxx-xxxx ou (xx) xxxx-xxxx" required={false} />
-        </>
-      )}
-      <Input label="Valor" inputMode="numeric" value={form.valor} set={(value) => setForm({ ...form, valor: formatCurrencyInput(value) })} />
-      <Input label="Taxa de entrega" inputMode="numeric" value={form.taxa_entrega} set={(value) => setForm({ ...form, taxa_entrega: formatCurrencyInput(value) })} required={false} />
-      <Input label="Valor corrida" inputMode="numeric" value={form.valor_corrida} set={(value) => setForm({ ...form, valor_corrida: formatCurrencyInput(value) })} required={false} />
-      <Select label="Forma de pagamento" value={form.forma_pagamento} set={(value) => setForm({ ...form, forma_pagamento: value })} options={FORMAS_PAGAMENTO} />
+      <FormSection title="Informações de endereço">
+        <Input label="Logradouro" value={form.logradouro} set={(value) => setForm({ ...form, logradouro: value })} />
+        <Input label="Número" value={form.numero} set={(value) => setForm({ ...form, numero: value })} required={false} />
+        <Input label="Bairro" value={form.bairro} set={(value) => setForm({ ...form, bairro: value })} />
+        <Select label="Cidade" value={form.cidade} set={(value) => setForm({ ...form, cidade: value })} options={CIDADES} />
+      </FormSection>
 
-      {isDinheiro && (
-        <>
-          <Input label="Valor que o cliente vai pagar" inputMode="numeric" value={form.valor_pago_dinheiro} set={(value) => setForm({ ...form, valor_pago_dinheiro: formatCurrencyInput(value) })} required={false} />
-          <label>Troco<input value={money(trocoDinheiro)} readOnly /></label>
-        </>
-      )}
+      <FormSection title="Informações da entrega">
+        <Select label="Vendedor" value={form.vendedor} set={(value) => setForm({ ...form, vendedor: value })} options={data.vendedores.filter((item) => item.status === 'Ativo').map((item) => ({ value: item._id, label: `${item.name} - Nº ${item.numero_venda}` }))} />
+        <DeliveryTypeRadio value={form.tipo_entregador} set={(value) => setForm({ ...form, tipo_entregador: value })} />
+        {form.tipo_entregador === 'Registrado' ? (
+          <Select label="Entregador" value={form.entregador} set={(value) => setForm({ ...form, entregador: value })} options={data.entregadores.filter((item) => item.status === 'Ativo').map((item) => ({ value: item._id, label: item.name }))} />
+        ) : (
+          <>
+            <Input label="Nome terceirizado" value={form.terceirizado_nome} set={(value) => setForm({ ...form, terceirizado_nome: value })} />
+            <Input label="Telefone terceirizado" value={form.terceirizado_telefone} set={(value) => setForm({ ...form, terceirizado_telefone: formatPhone(value) })} pattern="\(\d{2}\) \d{4,5}-\d{4}" title="Use o formato (xx) xxxxx-xxxx ou (xx) xxxx-xxxx" required={false} />
+          </>
+        )}
+        <Input label="Valor" inputMode="numeric" value={form.valor} set={(value) => setForm({ ...form, valor: formatCurrencyInput(value) })} />
+        <Input label="Taxa de entrega" inputMode="numeric" value={form.taxa_entrega} set={(value) => setForm({ ...form, taxa_entrega: formatCurrencyInput(value) })} required={false} />
+        <Select label="Forma de pagamento" value={form.forma_pagamento} set={(value) => setForm({ ...form, forma_pagamento: value })} options={FORMAS_PAGAMENTO} />
 
-      {isCombinado && (
-        <div className="combined-payments full">
-          <div className="combined-header">
-            <strong>Pagamentos combinados</strong>
-            <button type="button" className="secondary" onClick={addPagamento}><FontAwesomeIcon icon={faPlus} />Adicionar forma</button>
+        {isDinheiro && (
+          <>
+            <Input label="Valor que o cliente vai pagar" inputMode="numeric" value={form.valor_pago_dinheiro} set={(value) => setForm({ ...form, valor_pago_dinheiro: formatCurrencyInput(value) })} required={false} />
+            <label>Troco<input value={money(trocoDinheiro)} readOnly /></label>
+          </>
+        )}
+
+        {isCombinado && (
+          <div className="combined-payments full">
+            <div className="combined-header">
+              <strong>Pagamentos combinados</strong>
+              <button type="button" className="secondary" onClick={addPagamento}><FontAwesomeIcon icon={faPlus} />Adicionar forma</button>
+            </div>
+            {pagamentosCombinados.map((item, index) => {
+              const troco = item.forma === 'Dinheiro'
+                ? Math.max(parseCurrencyInput(item.valor_pago) - parseCurrencyInput(item.valor), 0)
+                : 0;
+
+              return (
+                <div className="combined-row" key={`${item.forma}-${index}`}>
+                  <Select label="Forma" value={item.forma} set={(value) => updatePagamento(index, 'forma', value)} options={FORMAS_PAGAMENTO.filter((forma) => forma !== 'Pagamento Combinado')} />
+                  <Input label="Valor nesta forma" inputMode="numeric" value={item.valor} set={(value) => updatePagamento(index, 'valor', formatCurrencyInput(value))} />
+                  {item.forma === 'Dinheiro' && <Input label="Valor pago" inputMode="numeric" value={item.valor_pago} set={(value) => updatePagamento(index, 'valor_pago', formatCurrencyInput(value))} required={false} />}
+                  {item.forma === 'Dinheiro' && <label>Troco<input value={money(troco)} readOnly /></label>}
+                  <button type="button" className="danger icon-only" onClick={() => removePagamento(index)} disabled={pagamentosCombinados.length === 1}><FontAwesomeIcon icon={faTrash} /></button>
+                </div>
+              );
+            })}
           </div>
-          {pagamentosCombinados.map((item, index) => {
-            const troco = item.forma === 'Dinheiro'
-              ? Math.max(parseCurrencyInput(item.valor_pago) - parseCurrencyInput(item.valor), 0)
-              : 0;
+        )}
 
-            return (
-              <div className="combined-row" key={`${item.forma}-${index}`}>
-                <Select label="Forma" value={item.forma} set={(value) => updatePagamento(index, 'forma', value)} options={FORMAS_PAGAMENTO.filter((forma) => forma !== 'Pagamento Combinado')} />
-                <Input label="Valor nesta forma" inputMode="numeric" value={item.valor} set={(value) => updatePagamento(index, 'valor', formatCurrencyInput(value))} />
-                {item.forma === 'Dinheiro' && <Input label="Valor pago" inputMode="numeric" value={item.valor_pago} set={(value) => updatePagamento(index, 'valor_pago', formatCurrencyInput(value))} required={false} />}
-                {item.forma === 'Dinheiro' && <label>Troco<input value={money(troco)} readOnly /></label>}
-                <button type="button" className="danger icon-only" onClick={() => removePagamento(index)} disabled={pagamentosCombinados.length === 1}><FontAwesomeIcon icon={faTrash} /></button>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      <label className="full">
-        Observações
-        <textarea value={form.observacoes} onChange={(event) => setForm({ ...form, observacoes: event.target.value })} />
-      </label>
+        <label className="full">
+          Observações
+          <textarea value={form.observacoes} onChange={(event) => setForm({ ...form, observacoes: event.target.value })} />
+        </label>
+      </FormSection>
     </FormPanel>
   );
 }
