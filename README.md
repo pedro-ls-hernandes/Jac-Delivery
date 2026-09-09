@@ -139,11 +139,12 @@ Capturas de tela contém informações fictícias e não sensíveis à empresa.
 
 | Captura | Imagem | Legenda |
 |---|---|---|
-| Visão geral | <img width="1920" height="958" alt="inicio" src="https://github.com/user-attachments/assets/4a696144-1d2b-4b6b-90a1-8cbbd0fab0e2" /> | Painel principal com indicadores e resumo das entregas. |
-| Nova entrega | <img width="1920" height="950" alt="nova entrega" src="https://github.com/user-attachments/assets/c13f3982-3b1e-44f0-91a2-2957654771a5" /> | Formulário de criação de entrega e pagamento. |
-| Lista de entregas | <img width="1920" height="958" alt="entregas" src="https://github.com/user-attachments/assets/fd9e9692-7068-4f6b-ae38-de0b32a43125" /> | Consulta, filtros e ações operacionais. |
-| Pessoas e grupos | <img width="1920" height="958" alt="vendedores" src="https://github.com/user-attachments/assets/ae3231bc-52d8-454b-9460-1db0e27da89b" /> <img width="1920" height="954" alt="entregadores" src="https://github.com/user-attachments/assets/df6608d6-c8d5-402f-bfb2-46b78da1a37e" /> | Gestão de vendedores, cadastros e grupos terceirizados. |
-| Relatórios | <img width="1920" height="960" alt="relatorios" src="https://github.com/user-attachments/assets/3112b3a0-3c56-4230-aa3a-ab40cdb741fa" /> | Métricas, relatórios e informações de pagamento. |
+| Visão geral | <img width="1920" height="958" alt="inicio" src="https://github.com/user-attachments/assets/3a0753fe-2b07-43d6-a552-cffc5e1bb569" /> | Painel principal com indicadores e resumo das entregas. |
+| Nova entrega | <img width="1920" height="950" alt="nova entrega" src="https://github.com/user-attachments/assets/9b08a695-0f2b-4be4-acb3-25976268befc" /> | Formulário de criação de entrega e pagamento. |
+| Lista de entregas | <img width="1920" height="958" alt="entregas" src="https://github.com/user-attachments/assets/ad8b8ef5-4c51-4518-8a6d-9561b7a06278" /> | Consulta, filtros e ações operacionais. |
+| Pessoas e grupos | <img width="1920" height="954" alt="entregadores" src="https://github.com/user-attachments/assets/8ecf6e11-3338-49ba-b0e3-cce7e8af5190" /><img width="1920" height="958" alt="vendedores" src="https://github.com/user-attachments/assets/e5f0813a-647e-47c7-af7f-d4d2a0ebac0c" />
+ | Gestão de vendedores, cadastros e grupos terceirizados. |
+| Relatórios | <img width="1920" height="960" alt="relatorios" src="https://github.com/user-attachments/assets/0c5bc1ab-21d6-4073-b1e3-b3d113b0d2fd" /> | Métricas, relatórios e informações de pagamento. |
 
 ## Licenciamento e divulgação
 
@@ -248,11 +249,12 @@ The screenshots contain fictitious information that is not sensitive to the comp
 
 | Screenshot | Image | Caption |
 |---|---|---|
-| Dashboard |  <img width="1920" height="958" alt="inicio" src="https://github.com/user-attachments/assets/4a696144-1d2b-4b6b-90a1-8cbbd0fab0e2" /> | Main panel with operational indicators and delivery summary. |
-| New delivery | <img width="1920" height="950" alt="nova entrega" src="https://github.com/user-attachments/assets/c13f3982-3b1e-44f0-91a2-2957654771a5" /> | Delivery, customer, payment and logistics assignment form. |
-| Deliveries | <img width="1920" height="958" alt="entregas" src="https://github.com/user-attachments/assets/fd9e9692-7068-4f6b-ae38-de0b32a43125" /> | Delivery list, filters, statuses and lifecycle actions. |
-| People and groups | <img width="1920" height="958" alt="vendedores" src="https://github.com/user-attachments/assets/ae3231bc-52d8-454b-9460-1db0e27da89b" /> <img width="1920" height="954" alt="entregadores" src="https://github.com/user-attachments/assets/df6608d6-c8d5-402f-bfb2-46b78da1a37e" /> | Salespeople, courier records and outsourced groups. |
-| Reports | <img width="1920" height="960" alt="relatorios" src="https://github.com/user-attachments/assets/3112b3a0-3c56-4230-aa3a-ab40cdb741fa" /> | Metrics, reports and payment-related information. |
+| Dashboard |  <img width="1920" height="958" alt="inicio" src="https://github.com/user-attachments/assets/48d0afa0-c8f1-4cdb-91cb-0b77d567256e" /> | Main panel with operational indicators and delivery summary. |
+| New delivery | <img width="1920" height="950" alt="nova entrega" src="https://github.com/user-attachments/assets/196dcf58-5a82-46b4-9e36-47bf2b64a834" /> | Delivery, customer, payment and logistics assignment form. |
+| Deliveries | <img width="1920" height="958" alt="entregas" src="https://github.com/user-attachments/assets/a6994adb-acc6-4ed3-b096-16553d745a31" /> | Delivery list, filters, statuses and lifecycle actions. |
+| People and groups | <img width="1920" height="954" alt="entregadores" src="https://github.com/user-attachments/assets/afb3883f-800b-4ce5-be66-8dcebfe8b62c" /><img width="1920" height="958" alt="vendedores" src="https://github.com/user-attachments/assets/b423e522-f7d1-413a-9a0f-465f3d1c9817" />
+ | Salespeople, courier records and outsourced groups. |
+| Reports | <img width="1920" height="960" alt="relatorios" src="https://github.com/user-attachments/assets/fb9b2e6a-f03a-4b90-a7a7-09fbc783d863" /> | Metrics, reports and payment-related information. |
 
 
 
