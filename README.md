@@ -1,4 +1,4 @@
-<details open>
+﻿<details open>
 <summary><strong>Documentação em português</strong></summary>
 
 # Jac Delivery
